@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build
+build/
+dist/
+
+# Data
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Generated Excel templates (kept in templates/ though)
+templates/*.xlsx
+
+# Misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.local
+.env*.local

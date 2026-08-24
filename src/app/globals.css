@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #060a13;
+  --color-panel: #0c1322;
+}
+
+html,
+body {
+  margin: 0;
+  background: #060a13;
+  color: #e2e8f0;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 560px at 8% -12%, rgba(124, 108, 255, 0.16), transparent 60%),
+    radial-gradient(1000px 520px at 105% -5%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(900px 680px at 50% 125%, rgba(244, 114, 182, 0.1), transparent 60%),
+    #060a13;
+  background-attachment: fixed;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.75);
+}
+
+/* Subtle custom scrollbar for the leaderboard table overflow. */
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes bello-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-bello-in {
+  animation: bello-fade-in 0.35s ease both;
+}

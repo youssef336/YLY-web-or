@@ -1,0 +1,31 @@
+{
+  "name": "member-evaluation-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Member Evaluation and Tracking System - Clean Architecture (Next.js + TypeScript)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "exceljs": "^4.4.0",
+    "idb": "^8.0.3",
+    "next": "^16.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.3.1",
+    "typescript": "^5.8.0"
+  }
+}
