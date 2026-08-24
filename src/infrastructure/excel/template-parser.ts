@@ -149,7 +149,7 @@ export function parseTemplateLayout(sheet: ExcelJS.Worksheet): ParsedTemplateLay
   // --- Discover rows ---
   const sectionHeaderRow = 2;
   const columnHeaderRow = 3;
-  const firstDataRow = 4;
+  const firstDataRow = 5;
 
   // --- Name column: always A ---
   const nameCol = 1;
