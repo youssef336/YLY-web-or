@@ -28,8 +28,20 @@ function writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
   ];
 
   for (const [columnLetter, formula] of formulas) {
-    row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
+    setFormulaCell(row, columnLetter, rowNumber, formula);
   }
+}
+
+function setFormulaCell(
+  row: ExcelJS.Row,
+  columnLetter: string,
+  rowNumber: number,
+  formula: string,
+): void {
+  if (!/^[A-Z]+$/i.test(columnLetter)) {
+    throw new Error(`Invalid formula column letter "${columnLetter}" for row ${rowNumber}. Use a column letter like "B" or "DE", not a cell reference like "B5".`);
+  }
+  row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
 }
 
 export interface OfficialEvent {
