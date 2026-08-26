@@ -380,12 +380,12 @@ export async function mergeExcelFiles(
 
     // ── Field Visit scores → columns C..Q (3..17) ──
     for (let i = 0; i < MAX_FIELD_VISITS; i++) {
-      row.getCell(OER_COL.FV_START + i).value = data.visits[i] ?? null;
+      row.getCell(OER_COL.FV_START + i).value = data.visits[i] != null ? data.visits[i] : "";
     }
 
     // ── Meeting scores → columns T..AH (20..34) ──
     for (let i = 0; i < MAX_MEETINGS; i++) {
-      row.getCell(OER_COL.M_START + i).value = data.meetings[i] ?? null;
+      row.getCell(OER_COL.M_START + i).value = data.meetings[i] != null ? data.meetings[i] : "";
     }
 
     // ── HR Tasks → columns AK..CT (37..66), 3 columns per task ──
@@ -393,13 +393,13 @@ export async function mergeExcelFiles(
       const task = data.tasks[i];
       const base = OER_COL.T_START + i * 3;
       if (task && (task.t !== 0 || task.q !== 0 || task.d !== 0)) {
-        row.getCell(base).value = task.t || null;
-        row.getCell(base + 1).value = task.q || null;
-        row.getCell(base + 2).value = task.d || null;
+        row.getCell(base).value = task.t;
+        row.getCell(base + 1).value = task.q;
+        row.getCell(base + 2).value = task.d;
       } else {
-        row.getCell(base).value = null;
-        row.getCell(base + 1).value = null;
-        row.getCell(base + 2).value = null;
+        row.getCell(base).value = "";
+        row.getCell(base + 1).value = "";
+        row.getCell(base + 2).value = "";
       }
     }
 
