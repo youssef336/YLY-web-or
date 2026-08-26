@@ -10,7 +10,7 @@ import {
 
 const { headerRow, firstDataRow, lastDataRow } = HR_TEMPLATE;
 
-function writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
+function writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row, sheet: ExcelJS.Worksheet): void {
   const formulas: Array<[string, string]> = [
     ['B', `IF(COUNTA(C${rowNumber}:Q${rowNumber})=0,"",COUNTA(C${rowNumber}:Q${rowNumber}))`],
     ['R', `ROUND(IFERROR(SUM(C${rowNumber}:Q${rowNumber})/B${rowNumber}*30,0),0)`],
@@ -28,12 +28,13 @@ function writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
   ];
 
   for (const [columnLetter, formula] of formulas) {
-    setFormulaCell(row, columnLetter, rowNumber, formula);
+    setFormulaCell(row, sheet, columnLetter, rowNumber, formula);
   }
 }
 
 function setFormulaCell(
   row: ExcelJS.Row,
+  sheet: ExcelJS.Worksheet,
   columnLetter: string,
   rowNumber: number,
   formula: string,
@@ -41,7 +42,7 @@ function setFormulaCell(
   if (!/^[A-Z]+$/i.test(columnLetter)) {
     throw new Error(`Invalid formula column letter "${columnLetter}" for row ${rowNumber}. Use a column letter like "B" or "DE", not a cell reference like "B5".`);
   }
-  row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
+  sheet.getCell(`${columnLetter}${rowNumber}`).value = { formula };
 }
 
 export interface OfficialEvent {
@@ -369,7 +370,7 @@ export async function mergeExcelFiles(
   // occupies that slot yet.
   for (let rowNumber = firstDataRow; rowNumber <= lastDataRow; rowNumber++) {
     const row = masterSheet.getRow(rowNumber);
-    writeCalculatedFormulas(rowNumber, row);
+    writeCalculatedFormulas(rowNumber, row, masterSheet);
 
     const data = allRemappedRows[rowNumber - firstDataRow];
     if (!data) continue;

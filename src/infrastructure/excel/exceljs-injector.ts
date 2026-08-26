@@ -98,7 +98,7 @@ export class ExceljsInjector implements ExcelGenerator {
     // currently have member data.
     for (let rowNumber = HR_TEMPLATE.firstDataRow; rowNumber <= HR_TEMPLATE.lastDataRow; rowNumber++) {
       const row = sheet.getRow(rowNumber);
-      this.writeCalculatedFormulas(rowNumber, row);
+      this.writeCalculatedFormulas(sheet, rowNumber, row);
 
       const profile = sorted[rowNumber - HR_TEMPLATE.firstDataRow];
       if (!profile) continue;
@@ -202,7 +202,11 @@ export class ExceljsInjector implements ExcelGenerator {
     }
   }
 
-  private writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
+  private writeCalculatedFormulas(
+    sheet: ExcelJS.Worksheet,
+    rowNumber: number,
+    row: ExcelJS.Row,
+  ): void {
     const formulas: Array<[string, string]> = [
       ['B', `IF(COUNTA(C${rowNumber}:Q${rowNumber})=0,"",COUNTA(C${rowNumber}:Q${rowNumber}))`],
       ['R', `ROUND(IFERROR(SUM(C${rowNumber}:Q${rowNumber})/B${rowNumber}*30,0),0)`],
@@ -220,12 +224,12 @@ export class ExceljsInjector implements ExcelGenerator {
     ];
 
     for (const [columnLetter, formula] of formulas) {
-      this.setFormulaCell(row, columnLetter, rowNumber, formula);
+      this.setFormulaCell(sheet, columnLetter, rowNumber, formula);
     }
   }
 
   private setFormulaCell(
-    row: ExcelJS.Row,
+    sheet: ExcelJS.Worksheet,
     columnLetter: string,
     rowNumber: number,
     formula: string,
@@ -233,7 +237,7 @@ export class ExceljsInjector implements ExcelGenerator {
     if (!/^[A-Z]+$/i.test(columnLetter)) {
       throw new Error(`Invalid formula column letter "${columnLetter}" for row ${rowNumber}. Use a column letter like "B" or "DE", not a cell reference like "B5".`);
     }
-    row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
+    sheet.getCell(`${columnLetter}${rowNumber}`).value = { formula };
   }
 
   private clearCachedFormulaResults(sheet: ExcelJS.Worksheet): void {
