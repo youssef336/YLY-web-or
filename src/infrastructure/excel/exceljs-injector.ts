@@ -140,10 +140,23 @@ export class ExceljsInjector implements ExcelGenerator {
         }
       }
 
-      // ── Category scores → CU(67), CV(68), CW(69) ──
+      // ── Category scores → CU(99), CV(100), CW(101) ──
       row.getCell(OER_COL.INTERACTION).value = profile.scores?.interaction ?? 0;
       row.getCell(OER_COL.RESPECT_HIERARCHY).value = profile.scores?.respectHierarchy ?? 0;
       row.getCell(OER_COL.BONUS).value = profile.scores?.bonus ?? 0;
+
+      // ── Brute-force clear residual ghost zeros at BO(67), BP(68), BQ(69) ──
+      // These columns correspond to task index 10 (37 + 10*3 = 67).
+      // Only clear if no real task occupies that slot.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const task10 = taskMap.get(10) as any;
+      const hasRealTask10 = task10 && task10.name &&
+        (task10.t !== 0 || task10.q !== 0 || task10.d !== 0);
+      if (!hasRealTask10) {
+        row.getCell(67).value = "";  // BO
+        row.getCell(68).value = "";  // BP
+        row.getCell(69).value = "";  // BQ
+      }
     }
 
     const buffer = await workbook.xlsx.writeBuffer();

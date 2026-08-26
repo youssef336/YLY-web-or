@@ -72,9 +72,9 @@ export const OER_COL = {
   M_END: 34,                    // AH (last meeting column = T + 14)
   T_COUNT: 36,                  // AJ (Tasks Entered — formula)
   T_START: 37,                  // AK (first task T column)
-  INTERACTION: 67,              // CU
-  RESPECT_HIERARCHY: 68,        // CV
-  BONUS: 69,                    // CW
+  INTERACTION: 99,               // CU
+  RESPECT_HIERARCHY: 100,        // CV
+  BONUS: 101,                    // CW
 } as const;
 
 /**
