@@ -121,10 +121,12 @@ export class ExceljsInjector implements ExcelGenerator {
       // ── HR Tasks → columns AK..CT (37..66), 3 columns per task ──
       for (const task of profile.hrTasks) {
         if (task.taskIndex < 0 || task.taskIndex >= MAX_HR_TASKS) continue;
+        // Skip empty task slots — do not write zeros
+        if (!task.name) continue;
         const base = OER_COL.T_START + task.taskIndex * 3;
-        row.getCell(base).value = task.t;       // T metric
-        row.getCell(base + 1).value = task.q;   // Q metric
-        row.getCell(base + 2).value = task.d;   // D metric
+        if (task.t !== 0) row.getCell(base).value = task.t;       // T metric
+        row.getCell(base + 1).value = task.q;                     // Q metric (always ≥ 1)
+        if (task.d !== 0) row.getCell(base + 2).value = task.d;   // D metric
       }
 
       // ── Category scores → CU(67), CV(68), CW(69) ──

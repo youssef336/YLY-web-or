@@ -391,12 +391,13 @@ export async function mergeExcelFiles(
     // ── HR Tasks → columns AK..CT (37..66), 3 columns per task ──
     for (let t = 0; t < MAX_HR_TASKS; t++) {
       const task = data.tasks[t];
-      if (task && (task.t !== 0 || task.q !== 0 || task.d !== 0)) {
-        const base = OER_COL.T_START + t * 3;
-        row.getCell(base).value = task.t;
-        row.getCell(base + 1).value = task.q;
-        row.getCell(base + 2).value = task.d;
-      }
+      if (!task) continue;
+      // Skip empty task slots — do not write zeros
+      if (task.t === 0 && task.q === 0 && task.d === 0) continue;
+      const base = OER_COL.T_START + t * 3;
+      if (task.t !== 0) row.getCell(base).value = task.t;       // T metric
+      if (task.q !== 0) row.getCell(base + 1).value = task.q;   // Q metric
+      if (task.d !== 0) row.getCell(base + 2).value = task.d;   // D metric
     }
 
     // ── Category scores → CU(67), CV(68), CW(69) ──
