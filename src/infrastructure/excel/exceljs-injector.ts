@@ -93,9 +93,15 @@ export class ExceljsInjector implements ExcelGenerator {
       return a.member.name.localeCompare(b.member.name);
     });
 
-    // ── Write member data rows (Row 4+) using HARDCODED OER column indices ──
-    sorted.forEach((profile, index) => {
-      const row = sheet.getRow(HR_TEMPLATE.firstDataRow + index);
+    // Populate the full template range so the workbook behaves like a pre-filled
+    // sheet with working formulas for every registry row, not just the rows that
+    // currently have member data.
+    for (let rowNumber = HR_TEMPLATE.firstDataRow; rowNumber <= HR_TEMPLATE.lastDataRow; rowNumber++) {
+      const row = sheet.getRow(rowNumber);
+      this.writeCalculatedFormulas(rowNumber, row);
+
+      const profile = sorted[rowNumber - HR_TEMPLATE.firstDataRow];
+      if (!profile) continue;
 
       // Name (column A = 1)
       row.getCell(OER_COL.NAME).value = profile.member.name;
@@ -125,7 +131,7 @@ export class ExceljsInjector implements ExcelGenerator {
       row.getCell(OER_COL.INTERACTION).value = profile.scores?.interaction ?? 0;
       row.getCell(OER_COL.RESPECT_HIERARCHY).value = profile.scores?.respectHierarchy ?? 0;
       row.getCell(OER_COL.BONUS).value = profile.scores?.bonus ?? 0;
-    });
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     return new Uint8Array(buffer as ArrayBuffer);
@@ -193,6 +199,28 @@ export class ExceljsInjector implements ExcelGenerator {
       const label = labelsBySlot.get(slot);
       if (!label) continue;
       headerRowCells.getCell(startCol + slot).value = label;
+    }
+  }
+
+  private writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
+    const formulas: Array<[string, string]> = [
+      ['B', `IF(COUNTA(C${rowNumber}:Q${rowNumber})=0,"",COUNTA(C${rowNumber}:Q${rowNumber}))`],
+      ['R', `ROUND(IFERROR(SUM(C${rowNumber}:Q${rowNumber})/B${rowNumber}*30,0),0)`],
+      ['S', `IF(COUNTA(T${rowNumber}:AH${rowNumber})=0,"",COUNTA(T${rowNumber}:AH${rowNumber}))`],
+      ['AI', `ROUND(IFERROR(SUM(T${rowNumber}:AH${rowNumber})/S${rowNumber}*30,0),0)`],
+      ['AJ', `IF(COUNTA(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber})=0,"",COUNTA(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber}))`],
+      ['CS', `ROUND(IFERROR(SUM(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber})/AJ${rowNumber}*10,0),0)`],
+      ['CT', `ROUND(IFERROR(SUM(AL${rowNumber},AO${rowNumber},AR${rowNumber},AU${rowNumber},AX${rowNumber},BA${rowNumber},BD${rowNumber},BG${rowNumber},BJ${rowNumber},BM${rowNumber},BP${rowNumber},BS${rowNumber},BV${rowNumber},BY${rowNumber},CB${rowNumber},CE${rowNumber},CH${rowNumber},CK${rowNumber},CN${rowNumber},CQ${rowNumber})/AJ${rowNumber}/5*5,0),0)`],
+      ['CU', `ROUND(IFERROR(SUM(AM${rowNumber},AP${rowNumber},AS${rowNumber},AV${rowNumber},AY${rowNumber},BB${rowNumber},BE${rowNumber},BH${rowNumber},BK${rowNumber},BN${rowNumber},BQ${rowNumber},BT${rowNumber},BW${rowNumber},BZ${rowNumber},CC${rowNumber},CF${rowNumber},CI${rowNumber},CL${rowNumber},CO${rowNumber},CR${rowNumber})/AJ${rowNumber}*5,0),0)`],
+      ['CV', `ROUND(SUM(CS${rowNumber}:CU${rowNumber}),2)`],
+      ['CZ', `ROUND(SUM(R${rowNumber},AI${rowNumber},CV${rowNumber},CW${rowNumber},CX${rowNumber},CY${rowNumber}),2)`],
+      ['DA', `ROUND(CZ${rowNumber}/110*100,1)`],
+      ['DB', `IF(CZ${rowNumber}>=90,"A",IF(CZ${rowNumber}>=80,"B",IF(CZ${rowNumber}>=70,"C",IF(CZ${rowNumber}>=60,"D",IF(CZ${rowNumber}>0,"F"," ")))))`],
+      ['DE', `IF(A${rowNumber}="","",DA${rowNumber}-ROW()/100000000)`],
+    ];
+
+    for (const [columnLetter, formula] of formulas) {
+      row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
     }
   }
 

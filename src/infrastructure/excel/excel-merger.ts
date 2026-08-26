@@ -10,6 +10,28 @@ import {
 
 const { headerRow, firstDataRow, lastDataRow } = HR_TEMPLATE;
 
+function writeCalculatedFormulas(rowNumber: number, row: ExcelJS.Row): void {
+  const formulas: Array<[string, string]> = [
+    ['B', `IF(COUNTA(C${rowNumber}:Q${rowNumber})=0,"",COUNTA(C${rowNumber}:Q${rowNumber}))`],
+    ['R', `ROUND(IFERROR(SUM(C${rowNumber}:Q${rowNumber})/B${rowNumber}*30,0),0)`],
+    ['S', `IF(COUNTA(T${rowNumber}:AH${rowNumber})=0,"",COUNTA(T${rowNumber}:AH${rowNumber}))`],
+    ['AI', `ROUND(IFERROR(SUM(T${rowNumber}:AH${rowNumber})/S${rowNumber}*30,0),0)`],
+    ['AJ', `IF(COUNTA(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber})=0,"",COUNTA(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber}))`],
+    ['CS', `ROUND(IFERROR(SUM(AK${rowNumber},AN${rowNumber},AQ${rowNumber},AT${rowNumber},AW${rowNumber},AZ${rowNumber},BC${rowNumber},BF${rowNumber},BI${rowNumber},BL${rowNumber},BO${rowNumber},BR${rowNumber},BU${rowNumber},BX${rowNumber},CA${rowNumber},CD${rowNumber},CG${rowNumber},CJ${rowNumber},CM${rowNumber},CP${rowNumber})/AJ${rowNumber}*10,0),0)`],
+    ['CT', `ROUND(IFERROR(SUM(AL${rowNumber},AO${rowNumber},AR${rowNumber},AU${rowNumber},AX${rowNumber},BA${rowNumber},BD${rowNumber},BG${rowNumber},BJ${rowNumber},BM${rowNumber},BP${rowNumber},BS${rowNumber},BV${rowNumber},BY${rowNumber},CB${rowNumber},CE${rowNumber},CH${rowNumber},CK${rowNumber},CN${rowNumber},CQ${rowNumber})/AJ${rowNumber}/5*5,0),0)`],
+    ['CU', `ROUND(IFERROR(SUM(AM${rowNumber},AP${rowNumber},AS${rowNumber},AV${rowNumber},AY${rowNumber},BB${rowNumber},BE${rowNumber},BH${rowNumber},BK${rowNumber},BN${rowNumber},BQ${rowNumber},BT${rowNumber},BW${rowNumber},BZ${rowNumber},CC${rowNumber},CF${rowNumber},CI${rowNumber},CL${rowNumber},CO${rowNumber},CR${rowNumber})/AJ${rowNumber}*5,0),0)`],
+    ['CV', `ROUND(SUM(CS${rowNumber}:CU${rowNumber}),2)`],
+    ['CZ', `ROUND(SUM(R${rowNumber},AI${rowNumber},CV${rowNumber},CW${rowNumber},CX${rowNumber},CY${rowNumber}),2)`],
+    ['DA', `ROUND(CZ${rowNumber}/110*100,1)`],
+    ['DB', `IF(CZ${rowNumber}>=90,"A",IF(CZ${rowNumber}>=80,"B",IF(CZ${rowNumber}>=70,"C",IF(CZ${rowNumber}>=60,"D",IF(CZ${rowNumber}>0,"F"," ")))))`],
+    ['DE', `IF(A${rowNumber}="","",DA${rowNumber}-ROW()/100000000)`],
+  ];
+
+  for (const [columnLetter, formula] of formulas) {
+    row.getCell(`${columnLetter}${rowNumber}`).value = { formula };
+  }
+}
+
 export interface OfficialEvent {
   name?: string;
   date: string;
@@ -330,10 +352,15 @@ export async function mergeExcelFiles(
     );
   }
 
-  // 4. Write remapped rows to master template using HARDCODED OER column indices
-  for (let i = 0; i < allRemappedRows.length; i++) {
-    const data = allRemappedRows[i];
-    const row = masterSheet.getRow(firstDataRow + i);
+  // 4. Write remapped rows to the full master template range. Each registry row
+  // remains a live pre-filled template with formula cells, even when no member data
+  // occupies that slot yet.
+  for (let rowNumber = firstDataRow; rowNumber <= lastDataRow; rowNumber++) {
+    const row = masterSheet.getRow(rowNumber);
+    writeCalculatedFormulas(rowNumber, row);
+
+    const data = allRemappedRows[rowNumber - firstDataRow];
+    if (!data) continue;
 
     // Name (column A = 1)
     row.getCell(OER_COL.NAME).value = data.name;
