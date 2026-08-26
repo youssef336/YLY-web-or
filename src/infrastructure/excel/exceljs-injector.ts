@@ -125,10 +125,14 @@ export class ExceljsInjector implements ExcelGenerator {
       for (let i = 0; i < MAX_HR_TASKS; i++) {
         const base = OER_COL.T_START + i * 3;
         const task = taskMap.get(i);
-        if (task && task.name) {
-          row.getCell(base).value = task.t;       // T metric
-          row.getCell(base + 1).value = task.q;   // Q metric
-          row.getCell(base + 2).value = task.d;   // D metric
+        // Strict check: task must exist, have a real name, AND have valid scores (not all-zero ghost entries)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const taskAny = task as any;
+        const isRealTask = taskAny && taskAny.name && (taskAny.t !== 0 || taskAny.q !== 0 || taskAny.d !== 0);
+        if (isRealTask) {
+          row.getCell(base).value = taskAny.t;
+          row.getCell(base + 1).value = taskAny.q;
+          row.getCell(base + 2).value = taskAny.d;
         } else {
           row.getCell(base).value = "";
           row.getCell(base + 1).value = "";

@@ -392,7 +392,9 @@ export async function mergeExcelFiles(
     for (let i = 0; i < MAX_HR_TASKS; i++) {
       const task = data.tasks[i];
       const base = OER_COL.T_START + i * 3;
-      if (task && (task.t !== 0 || task.q !== 0 || task.d !== 0)) {
+      // Strict check: must have at least one non-zero score (filter ghost tasks)
+      const isRealTask = task && (task.t !== 0 || task.q !== 0 || task.d !== 0);
+      if (isRealTask) {
         row.getCell(base).value = task.t;
         row.getCell(base + 1).value = task.q;
         row.getCell(base + 2).value = task.d;
