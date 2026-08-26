@@ -379,25 +379,28 @@ export async function mergeExcelFiles(
     row.getCell(OER_COL.NAME).value = data.name;
 
     // ── Field Visit scores → columns C..Q (3..17) ──
-    for (let s = 0; s < MAX_FIELD_VISITS; s++) {
-      if (data.visits[s] != null) row.getCell(OER_COL.FV_START + s).value = data.visits[s];
+    for (let i = 0; i < MAX_FIELD_VISITS; i++) {
+      row.getCell(OER_COL.FV_START + i).value = data.visits[i] ?? null;
     }
 
     // ── Meeting scores → columns T..AH (20..34) ──
-    for (let s = 0; s < MAX_MEETINGS; s++) {
-      if (data.meetings[s] != null) row.getCell(OER_COL.M_START + s).value = data.meetings[s];
+    for (let i = 0; i < MAX_MEETINGS; i++) {
+      row.getCell(OER_COL.M_START + i).value = data.meetings[i] ?? null;
     }
 
     // ── HR Tasks → columns AK..CT (37..66), 3 columns per task ──
-    for (let t = 0; t < MAX_HR_TASKS; t++) {
-      const task = data.tasks[t];
-      if (!task) continue;
-      // Skip empty task slots — do not write zeros
-      if (task.t === 0 && task.q === 0 && task.d === 0) continue;
-      const base = OER_COL.T_START + t * 3;
-      if (task.t !== 0) row.getCell(base).value = task.t;       // T metric
-      if (task.q !== 0) row.getCell(base + 1).value = task.q;   // Q metric
-      if (task.d !== 0) row.getCell(base + 2).value = task.d;   // D metric
+    for (let i = 0; i < MAX_HR_TASKS; i++) {
+      const task = data.tasks[i];
+      const base = OER_COL.T_START + i * 3;
+      if (task && (task.t !== 0 || task.q !== 0 || task.d !== 0)) {
+        row.getCell(base).value = task.t || null;
+        row.getCell(base + 1).value = task.q || null;
+        row.getCell(base + 2).value = task.d || null;
+      } else {
+        row.getCell(base).value = null;
+        row.getCell(base + 1).value = null;
+        row.getCell(base + 2).value = null;
+      }
     }
 
     // ── Category scores → CU(67), CV(68), CW(69) ──

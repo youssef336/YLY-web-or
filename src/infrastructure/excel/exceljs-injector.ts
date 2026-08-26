@@ -107,26 +107,34 @@ export class ExceljsInjector implements ExcelGenerator {
       row.getCell(OER_COL.NAME).value = profile.member.name;
 
       // ── Field Visit scores → columns C..Q (3..17) ──
-      for (const visit of profile.fieldVisits) {
-        if (visit.slot < 0 || visit.slot >= MAX_FIELD_VISITS) continue;
-        row.getCell(OER_COL.FV_START + visit.slot).value = visit.score;
+      // Clear all slots first, then write valid scores
+      const visitMap = new Map(profile.fieldVisits.map(v => [v.slot, v.score]));
+      for (let i = 0; i < MAX_FIELD_VISITS; i++) {
+        const score = visitMap.get(i);
+        row.getCell(OER_COL.FV_START + i).value = score ?? null;
       }
 
       // ── Meeting scores → columns T..AH (20..34) ──
-      for (const meeting of profile.meetings) {
-        if (meeting.slot < 0 || meeting.slot >= MAX_MEETINGS) continue;
-        row.getCell(OER_COL.M_START + meeting.slot).value = meeting.score;
+      const meetingMap = new Map(profile.meetings.map(m => [m.slot, m.score]));
+      for (let i = 0; i < MAX_MEETINGS; i++) {
+        const score = meetingMap.get(i);
+        row.getCell(OER_COL.M_START + i).value = score ?? null;
       }
 
       // ── HR Tasks → columns AK..CT (37..66), 3 columns per task ──
-      for (const task of profile.hrTasks) {
-        if (task.taskIndex < 0 || task.taskIndex >= MAX_HR_TASKS) continue;
-        // Skip empty task slots — do not write zeros
-        if (!task.name) continue;
-        const base = OER_COL.T_START + task.taskIndex * 3;
-        if (task.t !== 0) row.getCell(base).value = task.t;       // T metric
-        row.getCell(base + 1).value = task.q;                     // Q metric (always ≥ 1)
-        if (task.d !== 0) row.getCell(base + 2).value = task.d;   // D metric
+      const taskMap = new Map(profile.hrTasks.map(t => [t.taskIndex, t]));
+      for (let i = 0; i < MAX_HR_TASKS; i++) {
+        const base = OER_COL.T_START + i * 3;
+        const task = taskMap.get(i);
+        if (task && task.name) {
+          row.getCell(base).value = task.t || null;       // T metric
+          row.getCell(base + 1).value = task.q || null;   // Q metric
+          row.getCell(base + 2).value = task.d || null;   // D metric
+        } else {
+          row.getCell(base).value = null;
+          row.getCell(base + 1).value = null;
+          row.getCell(base + 2).value = null;
+        }
       }
 
       // ── Category scores → CU(67), CV(68), CW(69) ──
