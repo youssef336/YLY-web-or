@@ -13,6 +13,11 @@
   <img src="https://img.shields.io/badge/PWA-offline--first-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" />
 </p>
 
+<p align="center">
+  <img src="docs/screens.jpg" alt="Screens" width="100%"/>
+  <br/><sub>Member profile with sample scores (data stays in the browser)</sub>
+</p>
+
 <p align="center"><b><a href="https://yly-web-or.vercel.app">▶ Open the live demo</a></b></p>
 
 ## About
